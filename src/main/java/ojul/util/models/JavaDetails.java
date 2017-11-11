@@ -1,5 +1,7 @@
 package ojul.util.models;
 
+import java.io.Serializable;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -7,7 +9,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author ashik
  *
  */
-public class JDKDetails {
+public class JavaDetails implements Serializable {
+
+	private static final long serialVersionUID = 1L;
+
 	private String title;
 	private String size;
 	private String filepath;
@@ -16,7 +21,7 @@ public class JDKDetails {
 	private String fileName;
 	private String version;
 
-	public JDKDetails() {
+	public JavaDetails() {
 	}
 
 	public String getTitle() {
@@ -111,7 +116,7 @@ public class JDKDetails {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		JDKDetails other = (JDKDetails) obj;
+		JavaDetails other = (JavaDetails) obj;
 		if (this.SHA256 == null) {
 			if (other.SHA256 != null)
 				return false;
