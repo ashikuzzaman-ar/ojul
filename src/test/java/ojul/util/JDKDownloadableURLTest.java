@@ -5,7 +5,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import ojul.util.models.JDKDetails;
+import ojul.util.models.JavaDetails;
 
 public class JDKDownloadableURLTest {
 
@@ -51,7 +51,7 @@ public class JDKDownloadableURLTest {
 		 * 'http://www.oracle.com/technetwork/java/javase/downloads/jdk9-downloads-3848520.html'
 		 * and all other information are same like below
 		 */
-		JDKDetails jdkDetails1 = new JDKDetails();
+		JavaDetails jdkDetails1 = new JavaDetails();
 		jdkDetails1.setFileName("jdk-9.0.1_linux-x64_bin.rpm");
 		jdkDetails1.setFilepath("http://download.oracle.com/otn-pub/java/jdk/9.0.1+11/jdk-9.0.1_linux-x64_bin.rpm");
 		jdkDetails1.setSHA256("e93ddb7de5f03b1713ca4161517a24baf8c61e11bd735f52967ca45f996d9b8e");
@@ -61,7 +61,7 @@ public class JDKDownloadableURLTest {
 
 		Assert.assertTrue(this.jdkDownloadableURL.getJdkDetails().get(0).equals(jdkDetails1));
 
-		JDKDetails jdkDetails2 = new JDKDetails();
+		JavaDetails jdkDetails2 = new JavaDetails();
 		jdkDetails2.setFileName("jdk-9.0.1_linux-x64_bin.tar.gz");
 		jdkDetails2.setFilepath("http://download.oracle.com/otn-pub/java/jdk/9.0.1+11/jdk-9.0.1_linux-x64_bin.tar.gz");
 		jdkDetails2.setSHA256("2cdaf0ff92d0829b510edd883a4ac8322c02f2fc1beae95d048b6716076bc014");

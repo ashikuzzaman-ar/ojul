@@ -9,7 +9,7 @@ import org.jsoup.nodes.Element;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import ojul.util.models.JDKDetails;
+import ojul.util.models.JavaDetails;
 
 /**
  * This class will find out version specific url for latest jdk. This class is
@@ -27,7 +27,7 @@ public class JDKDownloadableURL implements DownloadableURL {
 	private String jdkURL;
 	private String downloadURL;
 	private String currentJDKVersion;
-	private List<JDKDetails> jdkDetails;
+	private List<JavaDetails> javaDetails;
 
 	/**
 	 * By default this constructor will initialize oracles base urls.
@@ -36,26 +36,28 @@ public class JDKDownloadableURL implements DownloadableURL {
 
 		this.oracleURL = "http://www.oracle.com";
 		this.jdkURL = this.oracleURL + "/technetwork/java/javase/downloads/index.html";
-		this.jdkDetails = new LinkedList<JDKDetails>();
+		this.javaDetails = new LinkedList<JavaDetails>();
 	}
 
 	/**
 	 * 
 	 * @return
 	 */
-	public List<JDKDetails> getJdkDetails() {
+	@Override
+	public List<JavaDetails> getJdkDetails() {
 
-		if (this.jdkDetails == null || this.jdkDetails.size() == 0) {
+		if (this.javaDetails == null || this.javaDetails.size() == 0) {
 
 			this.getLatestJDKVersion();
 		}
-		return this.jdkDetails;
+		return this.javaDetails;
 	}
 
 	/**
 	 * 
 	 * @return
 	 */
+	@Override
 	public String getDownloadURL() {
 
 		return this.downloadURL != null ? this.downloadURL : this.getDownloadPageURL();
@@ -65,6 +67,7 @@ public class JDKDownloadableURL implements DownloadableURL {
 	 * 
 	 * @return
 	 */
+	@Override
 	public String getCurrentJDKVersion() {
 
 		return this.currentJDKVersion != null ? this.currentJDKVersion : this.getLatestJDKVersion();
@@ -129,21 +132,21 @@ public class JDKDownloadableURL implements DownloadableURL {
 
 					// Splitting major two parts using "=" and taking 2nd part because
 					// 2nd part containing major informations
-					JDKDetails details = mapper.readValue(item.split("=")[1], JDKDetails.class);
+					JavaDetails details = mapper.readValue(item.split("=")[1], JavaDetails.class);
 					// Splitting using "']['" and taking 3rd element cleaning "']" from the
 					// last of the line
 					details.setFileName(item.split("=")[0].split("'\\]\\['")[2].replaceAll("'\\]", ""));
-					this.jdkDetails.add(details);
+					this.javaDetails.add(details);
 				}
 			}
 
 			// Extracting current jdk version from file name
-			this.currentJDKVersion = this.jdkDetails.get(0).getFileName().split("_")[0].split("-")[1];
+			this.currentJDKVersion = this.javaDetails.get(0).getFileName().split("_")[0].split("-")[1];
 
 			// Setting current jdk version in every jdkDetails object
-			for (int i = 0; i < this.jdkDetails.size(); i++) {
+			for (int i = 0; i < this.javaDetails.size(); i++) {
 
-				this.jdkDetails.get(i).setVersion(this.currentJDKVersion);
+				this.javaDetails.get(i).setVersion(this.currentJDKVersion);
 			}
 		} catch (Exception e) {
 
