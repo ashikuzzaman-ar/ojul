@@ -13,6 +13,7 @@ public class DecompressJava implements Runnable {
 
 	private String source;
 	private String destination;
+	private Process process;
 	private BufferedReader outputBuffer;
 	private BufferedReader errorBuffer;
 
@@ -20,6 +21,16 @@ public class DecompressJava implements Runnable {
 		super();
 		this.source = source;
 		this.destination = destination;
+	}
+
+	/**
+	 * This method returns false if the decompression process runs else true
+	 * 
+	 * @return
+	 */
+	public boolean isDecompressionComplete() {
+
+		return !this.process.isAlive();
 	}
 
 	/**
@@ -84,9 +95,9 @@ public class DecompressJava implements Runnable {
 			if (this.pathValidation()) {
 
 				String command = "tar -xvf " + this.source + " -C " + this.destination;
-				Process process = Runtime.getRuntime().exec(command);
-				this.errorBuffer = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-				this.outputBuffer = new BufferedReader(new InputStreamReader(process.getInputStream()));
+				this.process = Runtime.getRuntime().exec(command);
+				this.errorBuffer = new BufferedReader(new InputStreamReader(this.process.getErrorStream()));
+				this.outputBuffer = new BufferedReader(new InputStreamReader(this.process.getInputStream()));
 			}
 		} catch (Exception e) {
 

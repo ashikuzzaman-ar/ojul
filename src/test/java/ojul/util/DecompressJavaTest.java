@@ -4,11 +4,7 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-public class DecompressJavaTest {
-
-	private static final String OJUL_HOME = System.getProperty("user.home") + "/.ojul/";
-	private static final String JAVA_HOME = OJUL_HOME + "oracle-java/";
-	private static final String TEMP_HOME = OJUL_HOME + "temp/";
+public class DecompressJavaTest implements ResourcePath {
 
 	@Test
 	public void test_1() throws InterruptedException, IOException {
