@@ -60,6 +60,15 @@ public class Downloader implements Runnable, ResourcePath {
 	}
 
 	/**
+	 * This method will return the selected Java Details to download
+	 * 
+	 * @return the javaDetails
+	 */
+	public JavaDetails getJavaDetails() {
+		return this.javaDetails;
+	}
+
+	/**
 	 * This method will be used for running downloading in standalone mode rather
 	 * creating thread object
 	 */
@@ -205,7 +214,7 @@ public class Downloader implements Runnable, ResourcePath {
 	 */
 	public double getAverageDownloadSpeed() {
 
-		return this.information == null ? 0.0D : this.getDownloadedSize() / this.getElapsedTime();
+		return this.information == null ? 0.0D : this.getDownloadedSize() / (1.0 * this.getElapsedTime());
 	}
 
 	/**

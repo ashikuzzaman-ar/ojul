@@ -7,13 +7,9 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-public class DownloaderTest {
+public class DownloaderTest implements ResourcePath {
 
 	private Downloader downloader;
-	private static final String OJUL_HOME = System.getProperty("user.home") + "/.ojul/";
-	private static final String JAVA_HOME = OJUL_HOME + "oracle-java/";
-	private static final String TEMP_HOME = OJUL_HOME + "temp/";
-	// private File file;
 
 	@Before
 	public void setUp() throws Exception {
