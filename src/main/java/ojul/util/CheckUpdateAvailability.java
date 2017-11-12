@@ -9,12 +9,8 @@ import java.util.Scanner;
  * @author ashik
  *
  */
-public class CheckUpdateAvailability {
+public class CheckUpdateAvailability implements ResourcePath {
 
-	private static final String OJUL_HOME = System.getProperty("user.home") + "/.ojul/";
-	private static final String JAVA_HOME = OJUL_HOME + "oracle-java/";
-	// private static final String TEMP_HOME = OJUL_HOME + "temp/";
-	private static final String JAVA_DIRECTORY = JAVA_HOME + "java/";
 	private File file;
 	private String LOCAL_JAVA_VERSION;
 	private DownloadableURL downloadableURL;

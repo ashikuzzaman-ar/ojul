@@ -16,13 +16,10 @@ import ojul.util.models.JavaDetails;
  * @author ashik
  *
  */
-public class Downloader implements Runnable {
+public class Downloader implements Runnable, ResourcePath {
 
 	private DownloadableURL downloadableURL;
 	private JavaDetails javaDetails;
-	private static final String OJUL_HOME = System.getProperty("user.home") + "/.ojul/";
-	private static final String JAVA_HOME = OJUL_HOME + "oracle-java/";
-	private static final String TEMP_HOME = OJUL_HOME + "temp/";
 	private File file;
 	private URL url;
 	private HttpURLConnection httpURLConnection;
