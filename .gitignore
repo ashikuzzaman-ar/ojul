@@ -1,3 +1,6 @@
 /target/
 /.classpath
 /.project
+/install.sh~
+/release~
+/update.sh~
