@@ -25,7 +25,7 @@ public class JavaDetails implements Serializable {
 	}
 
 	public String getTitle() {
-		return this.title;
+		return this.title.trim();
 	}
 
 	public void setTitle(String title) {
@@ -33,7 +33,7 @@ public class JavaDetails implements Serializable {
 	}
 
 	public String getSize() {
-		return this.size;
+		return this.size.trim();
 	}
 
 	public void setSize(String size) {
@@ -41,7 +41,7 @@ public class JavaDetails implements Serializable {
 	}
 
 	public String getFilepath() {
-		return this.filepath;
+		return this.filepath.trim();
 	}
 
 	public void setFilepath(String filepath) {
@@ -49,7 +49,7 @@ public class JavaDetails implements Serializable {
 	}
 
 	public String getSHA256() {
-		return this.SHA256;
+		return this.SHA256.trim();
 	}
 
 	public void setSHA256(String SHA256) {
@@ -57,7 +57,7 @@ public class JavaDetails implements Serializable {
 	}
 
 	public String getFileName() {
-		return this.fileName;
+		return this.fileName.trim();
 	}
 
 	public void setFileName(String fileName) {
@@ -65,7 +65,7 @@ public class JavaDetails implements Serializable {
 	}
 
 	public String getVersion() {
-		return this.version;
+		return this.version.trim();
 	}
 
 	public void setVersion(String version) {
