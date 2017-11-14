@@ -43,22 +43,16 @@ public class DownloaderTest implements ResourcePath {
 	public void testDownloading() {
 
 		this.downloader.startDownload();
-		while (!downloader.isDownloadComplete()) {
+		while (!this.downloader.isDownloadComplete()) {
 
 			try {
 
-				System.out.println("Downloaded : " + this.downloader.getDownloadedSize());
-				System.out.println("Time Passed: " + this.downloader.getElapsedTime() / 1000);
-				System.out.println("Download Percentage: " + this.downloader.getDownloadedPercentage() + " %");
-				System.out.println("Average Download Speed : " + this.downloader.getAverageDownloadSpeed());
-				System.out.println("Remaining Size : " + this.downloader.getRemainingDownloadableSize());
-				System.out.println("Remaining Time : " + this.downloader.getRequiredTimeToCompleteDownload());
-				System.out.println("\n\n\n\n");
 				Thread.sleep(1000L);
 			} catch (Exception e) {
 
 				e.printStackTrace();
 			}
 		}
+		System.out.println("Download is completed : " + this.downloader.isDownloadComplete());
 	}
 }

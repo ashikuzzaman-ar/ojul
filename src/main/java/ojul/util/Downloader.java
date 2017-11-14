@@ -60,21 +60,19 @@ public class Downloader implements Runnable, ResourcePath {
 	}
 
 	/**
-	 * This method will return the selected Java Details to download
-	 * 
-	 * @return the javaDetails
-	 */
-	public JavaDetails getJavaDetails() {
-		return this.javaDetails;
-	}
-
-	/**
 	 * This method will be used for running downloading in standalone mode rather
 	 * creating thread object
 	 */
 	public void startDownload() {
 
 		new Thread(this).start();
+	}
+
+	/**
+	 * @return the javaDetails
+	 */
+	public JavaDetails getJavaDetails() {
+		return this.javaDetails;
 	}
 
 	/**
@@ -184,6 +182,35 @@ public class Downloader implements Runnable, ResourcePath {
 		return true;
 	}
 
+	public void showDownloadDetails() {
+
+		try {
+
+			while (!this.isDownloadComplete()) {
+
+				Thread.sleep(1000L);
+
+				for (int i = 0; i < 100; i++) {
+
+					System.out.println();
+				}
+
+				System.out.println(
+						"Downloaded               : " + (this.getDownloadedSize() / (1.0 * 1024 * 1024)) + " MB");
+				System.out.println("Time Passed              : " + (this.getElapsedTime() / (1.0 * 1000)) + " Sec.");
+				System.out.println("Downloaded Percentage    : " + this.getDownloadedPercentage() + " %");
+				System.out.println("Average Download Speed   : " + (this.getAverageDownloadSpeed() / 1.0) + " KB/S");
+				System.out.println("Remaining Size           : "
+						+ (this.getRemainingDownloadableSize() / (1.0 * 1024 * 1024)) + " MB");
+				System.out.println("Remaining Time           : "
+						+ (this.getRequiredTimeToCompleteDownload() / (1.0 * 1000)) + " (Approx.)");
+			}
+		} catch (Exception e) {
+
+			e.printStackTrace();
+		}
+	}
+
 	/**
 	 * Returns the remaining time to complete the download in millisecond
 	 * 
@@ -225,7 +252,7 @@ public class Downloader implements Runnable, ResourcePath {
 	public double getDownloadedPercentage() {
 
 		return this.information == null ? 0
-				: (this.getDownloadedSize() * 100)
+				: (this.getDownloadedSize() * 100.0)
 						/ (Double.parseDouble(this.javaDetails.getSize().split(" ")[0]) * 1024 * 1024);
 	}
 
