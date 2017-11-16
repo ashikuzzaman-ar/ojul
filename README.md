@@ -27,11 +27,11 @@ Here two additional Java library is used:
 
 ### Download:
 
-	Download OJUL from here : 
+	Download OJUL from SourceForge : 
 	
-[Download URL](https://goo.gl/qWioSL) 
+[Download URL From SourceForge](https://sourceforge.net/projects/ojul/) 
 	
-	Download the latest version from the drive.
+	Download the latest version from the released versions.
 
 
 ### Extract: 
