@@ -38,6 +38,7 @@ if [ ! -e $OJUL_HOME/release ]; then
     then
         echo "Done with porting path variable to .bashrc file..."
     else
+        echo "Exporting path variable to .bashrc file..."
         echo "" >> $BASHRC_FILE
 	    echo "# Oracle JAVA Paths" >> $BASHRC_FILE
 	    echo "export JAVA_HOME=$JAVA_HOME/java" >> $BASHRC_FILE
