@@ -43,7 +43,9 @@ if [ ! -e $OJUL_HOME/release ]; then
 	#source ~/.bashrc
 
 	# Copying all required/binary file for ojul to the application root directory
-	for FILE in `ls`
+	ojul_source_folder="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+    cd $ojul_source_folder
+    for FILE in `ls`
 	do
 		cp -rf $FILE $OJUL_HOME
 		echo "Copying $FILE to $OJUL_HOME ..."
