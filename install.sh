@@ -2,7 +2,7 @@
 #clear
 
 # Initializing 
-USER_HOME="/home/$USER"
+USER_HOME="$HOME"
 BASHRC_FILE="$USER_HOME/.bashrc"
 CURRENT_DIRECTORY=`pwd`
 OJUL_HOME="$USER_HOME/.ojul"

@@ -2,7 +2,7 @@
 #clear
 
 # Initializing
-USER_HOME="/home/$USER"
+USER_HOME="$HOME"
 OJUL_HOME="$USER_HOME/.ojul"
 TEMP_HOME="$OJUL_HOME/temp"
 JAVA_HOME="$OJUL_HOME/oracle-java"
