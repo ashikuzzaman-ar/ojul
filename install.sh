@@ -32,12 +32,18 @@ if [ ! -e $OJUL_HOME/release ]; then
 		touch $BASHRC_FILE
 	fi
 
-	# Exporting path variable to source (.hashrc) file
-	echo "" >> $BASHRC_FILE
-	echo "# Oracle JAVA Paths" >> $BASHRC_FILE
-	echo "export JAVA_HOME=$JAVA_HOME/java" >> $BASHRC_FILE
-	echo "export PATH=\$JAVA_HOME/bin:\$PATH" >> $BASHRC_FILE
-	echo "alias ojul='bash $OJUL_HOME/update.sh'" >> $BASHRC_FILE
+
+    # Exporting path variable to source (.bashrc) file
+	if grep -q "# Oracle JAVA Paths" "$BASHRC_FILE"
+    then
+        echo "Done with porting path variable to .bashrc file..."
+    else
+        echo "" >> $BASHRC_FILE
+	    echo "# Oracle JAVA Paths" >> $BASHRC_FILE
+	    echo "export JAVA_HOME=$JAVA_HOME/java" >> $BASHRC_FILE
+	    echo "export PATH=\$JAVA_HOME/bin:\$PATH" >> $BASHRC_FILE
+	    echo "alias ojul='bash $OJUL_HOME/update.sh'" >> $BASHRC_FILE
+    fi
 
 	#Reloading source (.bashrc) file
 	#source ~/.bashrc
