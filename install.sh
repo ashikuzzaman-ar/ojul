@@ -126,5 +126,37 @@ if [ ! -e $JAVA_HOME/java/release ]; then
 	source ~/.bashrc
 fi
 
+#adding update.sh to cron
+read -p "Do you want ojul to do a daily check for update?[yes/no]: " option
+
+if [[ $option == "yes" ]]
+then
+    
+    #copy current users crontab as cron
+    crontab -l > $USER_HOME/.ojul/cron
+    
+    #check if ojul's update.sh is already added to cron or not 
+    if grep -q "$USER_HOME/.ojul/update.sh" "$USER_HOME/.ojul/cron"
+    then
+        echo "update.sh is already added to cron"
+	#delete crontab's copy
+	rm $USER_HOME/.ojul/cron
+    else
+	echo "When do you want your daily check for update?"
+    	echo "Enter the  time in 24 hour format(i.e. 14 for 2pm and 06 for 6am): "
+    	read update_hour
+
+	#add cron job to crontab's copy	
+	echo "00 $update_hour * * * (date && $USER_HOME/.ojul/update.sh) >> /$USER_HOME/.ojul/cron.log" >> $USER_HOME/.ojul/cron
+	
+	#update cron using copy crontab
+	crontab $USER_HOME/.ojul/cron
+
+	#delete crontab's copy
+	rm $USER_HOME/.ojul/cron
+    fi
+
+fi
+
 # Running ojul by default
 bash $OJUL_HOME/update.sh
