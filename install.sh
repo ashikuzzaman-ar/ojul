@@ -2,7 +2,7 @@
 #clear
 
 # Initializing 
-USER_HOME="/home/$USER"
+USER_HOME="$HOME"
 BASHRC_FILE="$USER_HOME/.bashrc"
 CURRENT_DIRECTORY=`pwd`
 OJUL_HOME="$USER_HOME/.ojul"
@@ -32,18 +32,27 @@ if [ ! -e $OJUL_HOME/release ]; then
 		touch $BASHRC_FILE
 	fi
 
-	# Exporting path variable to source (.hashrc) file
-	echo "" >> $BASHRC_FILE
-	echo "# Oracle JAVA Paths" >> $BASHRC_FILE
-	echo "export JAVA_HOME=$JAVA_HOME/java" >> $BASHRC_FILE
-	echo "export PATH=\$JAVA_HOME/bin:\$PATH" >> $BASHRC_FILE
-	echo "alias ojul='bash $OJUL_HOME/update.sh'" >> $BASHRC_FILE
+
+    # Exporting path variable to source (.bashrc) file
+	if grep -q "# Oracle JAVA Paths" "$BASHRC_FILE"
+    then
+        echo "Done with porting path variable to .bashrc file..."
+    else
+        echo "Exporting path variable to .bashrc file..."
+        echo "" >> $BASHRC_FILE
+	    echo "# Oracle JAVA Paths" >> $BASHRC_FILE
+	    echo "export JAVA_HOME=$JAVA_HOME/java" >> $BASHRC_FILE
+	    echo "export PATH=\$JAVA_HOME/bin:\$PATH" >> $BASHRC_FILE
+	    echo "alias ojul='bash $OJUL_HOME/update.sh'" >> $BASHRC_FILE
+    fi
 
 	#Reloading source (.bashrc) file
 	#source ~/.bashrc
 
 	# Copying all required/binary file for ojul to the application root directory
-	for FILE in `ls`
+	ojul_source_folder="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+    cd $ojul_source_folder
+    for FILE in `ls`
 	do
 		cp -rf $FILE $OJUL_HOME
 		echo "Copying $FILE to $OJUL_HOME ..."
@@ -115,6 +124,38 @@ if [ ! -e $JAVA_HOME/java/release ]; then
 
 	#Reloading source (.bashrc) file
 	source ~/.bashrc
+fi
+
+#adding update.sh to cron
+read -p "Do you want ojul to do a daily check for update?[yes/no]: " option
+
+if [[ $option == "yes" ]]
+then
+    
+    #copy current users crontab as cron
+    crontab -l > $USER_HOME/.ojul/cron
+    
+    #check if ojul's update.sh is already added to cron or not 
+    if grep -q "$USER_HOME/.ojul/update.sh" "$USER_HOME/.ojul/cron"
+    then
+        echo "update.sh is already added to cron"
+	#delete crontab's copy
+	rm $USER_HOME/.ojul/cron
+    else
+	echo "When do you want your daily check for update?"
+    	echo "Enter the  time in 24 hour format(i.e. 14 for 2pm and 06 for 6am): "
+    	read update_hour
+
+	#add cron job to crontab's copy	
+	echo "00 $update_hour * * * (date && $USER_HOME/.ojul/update.sh) >> /$USER_HOME/.ojul/cron.log" >> $USER_HOME/.ojul/cron
+	
+	#update cron using copy crontab
+	crontab $USER_HOME/.ojul/cron
+
+	#delete crontab's copy
+	rm $USER_HOME/.ojul/cron
+    fi
+
 fi
 
 # Running ojul by default
