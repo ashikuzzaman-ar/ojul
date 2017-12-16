@@ -1,16 +1,15 @@
 /**
- * OJUL(Oracle Java Updater for Linux) is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    OJUL(Oracle Java Updater for Linux) is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with OJUL(Oracle Java Updater for Linux).  If not, see <http://www.gnu.org/licenses/>.
+ * OJUL(Oracle Java Updater for Linux) is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ *
+ * OJUL(Oracle Java Updater for Linux) is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * OJUL(Oracle Java Updater for Linux). If not, see <http://www.gnu.org/licenses/>.
  */
 package ojul.util;
 
@@ -26,32 +25,27 @@ import java.nio.file.Paths;
 import ojul.util.models.JavaDetails;
 
 /**
- * 
+ *
  * @author ashik
  *
  */
 public class Downloader implements Runnable, ResourcePath {
 
-	private DownloadableURL downloadableURL;
-	private JavaDetails javaDetails;
-	private File file;
-	private URL url;
-	private HttpURLConnection httpURLConnection;
-	private InputStream inputStream;
-	private DownloadInformation information;
-
 	/**
 	 * This class will be used for tracking basic download information
-	 * 
+	 *
 	 * @author ashik
 	 *
 	 */
 	private class DownloadInformation {
 
-		private long timeBeforeStartingDownload;
-		private long timeAfterCompletingDownload;
 		private long downloadedSize;
+
 		private boolean isDownloadComplete;
+
+		private long timeAfterCompletingDownload;
+
+		private long timeBeforeStartingDownload;
 
 		public DownloadInformation() {
 
@@ -62,11 +56,26 @@ public class Downloader implements Runnable, ResourcePath {
 		}
 	}
 
+	private final DownloadableURL downloadableURL;
+
+	private File file;
+
+	private HttpURLConnection httpURLConnection;
+
+	private DownloadInformation information;
+
+	private InputStream inputStream;
+
+	private JavaDetails javaDetails;
+
+	private URL url;
+
 	/**
-	 * 
+	 *
 	 * @param downloadableURL
 	 */
 	public Downloader(DownloadableURL downloadableURL) {
+
 		super();
 		this.downloadableURL = downloadableURL;
 		this.checkDirectories();
@@ -74,231 +83,43 @@ public class Downloader implements Runnable, ResourcePath {
 	}
 
 	/**
-	 * This method will be used for running downloading in standalone mode rather
-	 * creating thread object
+	 * This method will check the basic configurations and directory patterns required
+	 * for this application
 	 */
-	public void startDownload() {
-
-		new Thread(this).start();
-	}
-
-	/**
-	 * @return the javaDetails
-	 */
-	public JavaDetails getJavaDetails() {
-		return this.javaDetails;
-	}
-
-	/**
-	 * This method will download the current java(jdk/jre)
-	 * 
-	 * @return
-	 */
-	private boolean download() {
+	private void checkDirectories() {
 
 		try {
 
-			// Creating URL from oracle's download page url
-			this.url = new URL(this.javaDetails.getFilepath());
+			this.file = new File(ResourcePath.OJUL_HOME);
+			if (!this.file.exists()) {
 
-			// Checking weather the original url is redirected or not
-			// If the original url is redirected creating new url using that
-			while (true) {
-
-				this.httpURLConnection = (HttpURLConnection) this.url.openConnection();
-
-				// Sometime page forwarding happens
-				// This line will allow the connection to handle them
-				this.httpURLConnection.setInstanceFollowRedirects(true);
-
-				// Oracle license accepting is hard coded here
-				this.httpURLConnection.setRequestProperty("Cookie", "oraclelicense=accept-securebackup-cookie");
-
-				int responseCode = this.httpURLConnection.getResponseCode();
-				if (responseCode != HttpURLConnection.HTTP_MOVED_PERM
-						&& responseCode != HttpURLConnection.HTTP_MOVED_TEMP && responseCode != 307) {
-
-					break;
-				}
-
-				this.url = new URL(this.httpURLConnection.getHeaderField("Location"));
+				this.file.mkdirs();
 			}
 
-			/**
-			 * If any error occurs while connecting the actual url then the downloading
-			 * process will be terminated and the error log will be printed
-			 */
-			if (this.httpURLConnection.getErrorStream() != null) {
+			this.file = new File(ResourcePath.JAVA_HOME);
+			if (!this.file.exists()) {
 
-				this.inputStream = this.httpURLConnection.getErrorStream();
-				BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(this.inputStream));
-				String error = null;
-				while ((error = bufferedReader.readLine()) != null) {
-
-					System.err.println(error);
-				}
-
-				return false;
+				this.file.mkdirs();
 			}
 
-			this.inputStream = this.httpURLConnection.getInputStream();
+			this.file = new File(ResourcePath.TEMP_HOME);
+			if (!this.file.exists()) {
 
-			this.information = new DownloadInformation();
+				this.file.mkdirs();
+			}
 
-			/**
-			 * This thread will independently calculate some basic information while
-			 * downloading the file
-			 */
-			new Thread(new Runnable() {
+			this.downloadableURL.getJdkDetails().forEach(details -> {
 
-				@Override
-				public void run() {
+				this.file = new File(ResourcePath.TEMP_HOME + details.getFileName());
+				if (this.file.exists()) {
 
-					try {
-
-						File file = new File(TEMP_HOME + javaDetails.getFileName());
-						information.timeBeforeStartingDownload = System.currentTimeMillis();
-
-						// Wait 2 seconds to start
-						Thread.sleep(2000L);
-
-						// This loop will continue until the downloading process stops
-						while (!information.isDownloadComplete) {
-
-							// If and only if the file exists then it can calculate
-							// the file size
-							if (file.exists()) {
-
-								information.downloadedSize = Files
-										.size(Paths.get(TEMP_HOME + javaDetails.getFileName()));
-							}
-
-							information.timeAfterCompletingDownload = System.currentTimeMillis();
-							Thread.sleep(100L);
-						}
-					} catch (Exception e) {
-
-						e.printStackTrace();
-					}
+					this.file.delete();
 				}
-			}).start();
-
-			// Downloading the file
-			Files.copy(this.inputStream, Paths.get(TEMP_HOME + this.javaDetails.getFileName()));
-
-			// Downloading trigger will be shut after completing the download
-			this.information.isDownloadComplete = true;
-		} catch (Exception e) {
+			});
+		} catch (final Exception e) {
 
 			e.printStackTrace();
 		}
-
-		return true;
-	}
-
-	public void showDownloadDetails() {
-
-		try {
-
-			while (!this.isDownloadComplete()) {
-
-				Thread.sleep(1000L);
-
-				for (int i = 0; i < 100; i++) {
-
-					System.out.println();
-				}
-
-				System.out.println(
-						"Downloaded               : " + (this.getDownloadedSize() / (1.0 * 1024 * 1024)) + " MB");
-				System.out.println("Time Passed              : " + (this.getElapsedTime() / (1.0 * 1000)) + " Sec.");
-				System.out.println("Downloaded Percentage    : " + this.getDownloadedPercentage() + " %");
-				System.out.println("Average Download Speed   : " + (this.getAverageDownloadSpeed() / 1.0) + " KB/S");
-				System.out.println("Remaining Size           : "
-						+ (this.getRemainingDownloadableSize() / (1.0 * 1024 * 1024)) + " MB");
-				System.out.println("Remaining Time           : "
-						+ (this.getRequiredTimeToCompleteDownload() / (1.0 * 1000)) + " (Approx.)");
-			}
-		} catch (Exception e) {
-
-			e.printStackTrace();
-		}
-	}
-
-	/**
-	 * Returns the remaining time to complete the download in millisecond
-	 * 
-	 * @return
-	 */
-	public long getRequiredTimeToCompleteDownload() {
-
-		return (long) (this.information == null ? -1
-				: this.getRemainingDownloadableSize() / this.getAverageDownloadSpeed());
-	}
-
-	/**
-	 * Returns the remaining volumes to download in byte unit
-	 * 
-	 * @return
-	 */
-	public long getRemainingDownloadableSize() {
-
-		return (long) (this.information == null ? -1L
-				: (Double.parseDouble(this.javaDetails.getSize().split(" ")[0]) * 1024 * 1024)
-						- this.getDownloadedSize());
-	}
-
-	/**
-	 * Returns the average download speed per second in KBPS
-	 * 
-	 * @return
-	 */
-	public double getAverageDownloadSpeed() {
-
-		return this.information == null ? 0.0D : this.getDownloadedSize() / (1.0 * this.getElapsedTime());
-	}
-
-	/**
-	 * Returns the percentage of already downloaded volume
-	 * 
-	 * @return
-	 */
-	public double getDownloadedPercentage() {
-
-		return this.information == null ? 0
-				: (this.getDownloadedSize() * 100.0)
-						/ (Double.parseDouble(this.javaDetails.getSize().split(" ")[0]) * 1024 * 1024);
-	}
-
-	/**
-	 * Returns the passed time from starting the download to the present time
-	 * 
-	 * @return
-	 */
-	public long getElapsedTime() {
-
-		return this.information == null ? 0L
-				: this.information.timeAfterCompletingDownload - this.information.timeBeforeStartingDownload;
-	}
-
-	/**
-	 * Returns true if download is completed successfully else false
-	 * 
-	 * @return
-	 */
-	public boolean isDownloadComplete() {
-
-		return this.information == null ? false : this.information.isDownloadComplete;
-	}
-
-	/**
-	 * Returns the already downloaded volume in byte unit
-	 * 
-	 * @return
-	 */
-	public long getDownloadedSize() {
-
-		return this.information == null ? 0 : this.information.downloadedSize;
 	}
 
 	/**
@@ -322,58 +143,260 @@ public class Downloader implements Runnable, ResourcePath {
 					this.javaDetails = jdkDetails;
 				}
 			});
-		} catch (Exception e) {
+		} catch (final Exception e) {
 
 			e.printStackTrace();
 		}
 	}
 
 	/**
-	 * This method will check the basic configurations and directory patterns
-	 * required for this application
+	 * This method will download the current java(jdk/jre)
+	 *
+	 * @return
 	 */
-	private void checkDirectories() {
+	private boolean download() {
 
 		try {
 
-			this.file = new File(OJUL_HOME);
-			if (!this.file.exists()) {
+			// Creating URL from oracle's download page url
+			this.url = new URL(this.javaDetails.getFilepath());
 
-				this.file.mkdirs();
-			}
+			// Checking weather the original url is redirected or not
+			// If the original url is redirected creating new url using that
+			while (true) {
 
-			this.file = new File(JAVA_HOME);
-			if (!this.file.exists()) {
+				this.httpURLConnection = (HttpURLConnection) this.url.openConnection();
 
-				this.file.mkdirs();
-			}
+				// Sometime page forwarding happens
+				// This line will allow the connection to handle them
+				this.httpURLConnection.setInstanceFollowRedirects(true);
 
-			this.file = new File(TEMP_HOME);
-			if (!this.file.exists()) {
+				// Oracle license accepting is hard coded here
+				this.httpURLConnection.setRequestProperty("Cookie",
+				        "oraclelicense=accept-securebackup-cookie");
 
-				this.file.mkdirs();
-			}
+				final int responseCode = this.httpURLConnection.getResponseCode();
+				if ((responseCode != HttpURLConnection.HTTP_MOVED_PERM)
+				        && (responseCode != HttpURLConnection.HTTP_MOVED_TEMP)
+				        && (responseCode != 307)) {
 
-			this.downloadableURL.getJdkDetails().forEach(details -> {
-
-				this.file = new File(TEMP_HOME + details.getFileName());
-				if (this.file.exists()) {
-
-					this.file.delete();
+					break;
 				}
-			});
-		} catch (Exception e) {
+
+				this.url = new URL(this.httpURLConnection.getHeaderField("Location"));
+			}
+
+			/**
+			 * If any error occurs while connecting the actual url then the downloading
+			 * process will be terminated and the error log will be printed
+			 */
+			if (this.httpURLConnection.getErrorStream() != null) {
+
+				this.inputStream = this.httpURLConnection.getErrorStream();
+				final BufferedReader bufferedReader = new BufferedReader(
+				        new InputStreamReader(this.inputStream));
+				String error = null;
+				while ((error = bufferedReader.readLine()) != null) {
+
+					System.err.println(error);
+				}
+
+				return false;
+			}
+
+			this.inputStream = this.httpURLConnection.getInputStream();
+
+			this.information = new DownloadInformation();
+
+			/**
+			 * This thread will independently calculate some basic information while
+			 * downloading the file
+			 */
+			new Thread(() -> {
+
+				try {
+
+					final File file = new File(ResourcePath.TEMP_HOME
+					        + Downloader.this.javaDetails.getFileName());
+					Downloader.this.information.timeBeforeStartingDownload = System
+					        .currentTimeMillis();
+
+					// Wait 2 seconds to start
+					Thread.sleep(2000L);
+
+					// This loop will continue until the downloading process stops
+					while (!Downloader.this.information.isDownloadComplete) {
+
+						// If and only if the file exists then it can calculate
+						// the file size
+						if (file.exists()) {
+
+							Downloader.this.information.downloadedSize = Files
+							        .size(Paths.get(ResourcePath.TEMP_HOME
+							                + Downloader.this.javaDetails
+							                        .getFileName()));
+						}
+
+						Downloader.this.information.timeAfterCompletingDownload = System
+						        .currentTimeMillis();
+						Thread.sleep(100L);
+					}
+				} catch (final Exception e) {
+
+					e.printStackTrace();
+				}
+			}).start();
+
+			// Downloading the file
+			Files.copy(this.inputStream,
+			        Paths.get(ResourcePath.TEMP_HOME + this.javaDetails.getFileName()));
+
+			// Downloading trigger will be shut after completing the download
+			this.information.isDownloadComplete = true;
+		} catch (final Exception e) {
 
 			e.printStackTrace();
 		}
+
+		return true;
 	}
 
 	/**
-	 * 
+	 * Returns the average download speed per second in KBPS
+	 *
+	 * @return
+	 */
+	public double getAverageDownloadSpeed() {
+
+		return this.information == null ? 0.0D
+		        : this.getDownloadedSize() / (1.0 * this.getElapsedTime());
+	}
+
+	/**
+	 * Returns the percentage of already downloaded volume
+	 *
+	 * @return
+	 */
+	public double getDownloadedPercentage() {
+
+		return this.information == null ? 0
+		        : (this.getDownloadedSize() * 100.0)
+		                / (Double.parseDouble(this.javaDetails.getSize().split(" ")[0])
+		                        * 1024 * 1024);
+	}
+
+	/**
+	 * Returns the already downloaded volume in byte unit
+	 *
+	 * @return
+	 */
+	public long getDownloadedSize() {
+
+		return this.information == null ? 0 : this.information.downloadedSize;
+	}
+
+	/**
+	 * Returns the passed time from starting the download to the present time
+	 *
+	 * @return
+	 */
+	public long getElapsedTime() {
+
+		return this.information == null ? 0L
+		        : this.information.timeAfterCompletingDownload
+		                - this.information.timeBeforeStartingDownload;
+	}
+
+	/**
+	 * @return the javaDetails
+	 */
+	public JavaDetails getJavaDetails() {
+
+		return this.javaDetails;
+	}
+
+	/**
+	 * Returns the remaining volumes to download in byte unit
+	 *
+	 * @return
+	 */
+	public long getRemainingDownloadableSize() {
+
+		return (long) (this.information == null ? -1L
+		        : (Double.parseDouble(this.javaDetails.getSize().split(" ")[0]) * 1024
+		                * 1024) - this.getDownloadedSize());
+	}
+
+	/**
+	 * Returns the remaining time to complete the download in millisecond
+	 *
+	 * @return
+	 */
+	public long getRequiredTimeToCompleteDownload() {
+
+		return (long) (this.information == null ? -1
+		        : this.getRemainingDownloadableSize() / this.getAverageDownloadSpeed());
+	}
+
+	/**
+	 * Returns true if download is completed successfully else false
+	 *
+	 * @return
+	 */
+	public boolean isDownloadComplete() {
+
+		return this.information == null ? false : this.information.isDownloadComplete;
+	}
+
+	/**
+	 *
 	 */
 	@Override
 	public void run() {
 
 		this.download();
+	}
+
+	public void showDownloadDetails() {
+
+		try {
+
+			while (!this.isDownloadComplete()) {
+
+				Thread.sleep(1000L);
+
+				for (int i = 0; i < 100; i++) {
+
+					System.out.println();
+				}
+
+				System.out.println("Downloaded               : "
+				        + (this.getDownloadedSize() / (1.0 * 1024 * 1024)) + " MB");
+				System.out.println("Time Passed              : "
+				        + (this.getElapsedTime() / (1.0 * 1000)) + " Sec.");
+				System.out.println("Downloaded Percentage    : "
+				        + this.getDownloadedPercentage() + " %");
+				System.out.println("Average Download Speed   : "
+				        + (this.getAverageDownloadSpeed() / 1.0) + " KB/S");
+				System.out.println("Remaining Size           : "
+				        + (this.getRemainingDownloadableSize() / (1.0 * 1024 * 1024))
+				        + " MB");
+				System.out.println("Remaining Time           : "
+				        + (this.getRequiredTimeToCompleteDownload() / (1.0 * 1000))
+				        + " (Approx.)");
+			}
+		} catch (final Exception e) {
+
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * This method will be used for running downloading in standalone mode rather
+	 * creating thread object
+	 */
+	public void startDownload() {
+
+		new Thread(this).start();
 	}
 }
